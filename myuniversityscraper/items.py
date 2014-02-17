@@ -1,11 +1,11 @@
-# Define here the models for your scraped items
-#
-# See documentation in:
-# http://doc.scrapy.org/en/latest/topics/items.html
-
 from scrapy.item import Item, Field
 
-class MyuniversityscraperItem(Item):
-    # define the fields for your item here like:
-    # name = Field()
-    pass
+class Course(Item):
+    course_name = Field()
+    cutoff_atar = Field()
+    duration = Field()
+    award_type = Field()
+    field_of_education = Field()
+    provider = Field()
+    campus = Field()
+    level = Field()

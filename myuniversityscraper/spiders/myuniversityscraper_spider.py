@@ -11,25 +11,28 @@ class MyuniversityscraperSpider(Spider):
 		course_levels = ['Undergraduate', 'Postgraduate']
 		requests = []
 		for course_level in course_levels:
-			requests.append(FormRequest('http://myuniversity.gov.au/' + course_level + 'Courses/GetSearchResults', formdata={
-				'courseCutOff': '100',
-				'courseCutOffQld': '1',
-				'courseEntryCutOffOption': '0',
-				'courseFee': '100000',
-				'courseFeeOption': '0',
-				'courseLevelOption': course_level,
-				'courseName': '',
-				'degreeStudyOption': '0',
-				'deliveryOption': '0',
-				'excludedWords': '',
-				'page':	'1',
-				'pageSize':	'Hundred',
-				'providerType':	'0',
-				'resetSelections': 'false',
-				'sortDirection': 'Ascending',
-				'sortOrder': ''
-			}, callback=self.get_courses))
+			requests.append(self.get_request(course_level, 0))
 		return requests
+
+	def get_request(self, course_level, page_number):
+		return FormRequest('http://myuniversity.gov.au/' + course_level + 'Courses/GetSearchResults', formdata={
+			'courseCutOff': '100',
+			'courseCutOffQld': '1',
+			'courseEntryCutOffOption': '0',
+			'courseFee': '100000',
+			'courseFeeOption': '0',
+			'courseLevelOption': course_level,
+			'courseName': '',
+			'degreeStudyOption': '0',
+			'deliveryOption': '0',
+			'excludedWords': '',
+			'page':	str(page_number + 1),
+			'pageSize':	'Hundred',
+			'providerType':	'0',
+			'resetSelections': 'false',
+			'sortDirection': 'Ascending',
+			'sortOrder': ''
+		}, callback=self.get_courses)
 
 	def get_courses(self, response):
 		is_undergraduate = 'Undergraduate' in response.url
@@ -61,21 +64,4 @@ class MyuniversityscraperSpider(Spider):
 		current_page = int(sel.xpath("//div[@class='myuni-alignright-whenbig'][../p[@id='navigationDescriptor']]/label/input/@value").extract()[0])
 		if number_of_pages > current_page:
 			course_level = 'Undergraduate' if is_undergraduate else 'Postgraduate'
-			yield FormRequest('http://myuniversity.gov.au/' + course_level + 'Courses/GetSearchResults', formdata={
-				'courseCutOff': '100',
-				'courseCutOffQld': '1',
-				'courseEntryCutOffOption': '0',
-				'courseFee': '100000',
-				'courseFeeOption': '0',
-				'courseLevelOption': course_level,
-				'courseName': '',
-				'degreeStudyOption': '0',
-				'deliveryOption': '0',
-				'excludedWords': '',
-				'page':	str(current_page + 1),
-				'pageSize':	'Hundred',
-				'providerType':	'0',
-				'resetSelections': 'false',
-				'sortDirection': 'Ascending',
-				'sortOrder': ''
-			}, callback=self.get_courses)
+			yield self.get_request(course_level, current_page)

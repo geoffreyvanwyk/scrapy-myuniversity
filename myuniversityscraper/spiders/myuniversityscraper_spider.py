@@ -1,7 +1,9 @@
 from scrapy.spider import Spider
 from scrapy.selector import Selector
 from scrapy.http import FormRequest
+
 from myuniversityscraper.items import Course
+from myuniversityscraper.exceptions import WebPageChangedError
 
 class MyuniversityscraperSpider(Spider):
 	name = 'myuniversity'
@@ -41,20 +43,12 @@ class MyuniversityscraperSpider(Spider):
 		try:
 			course_elements = sel.xpath("//div[@class='myuni-small-cell-block']")
 			if course_elements == []:
-				raise Exception(
-					"WebPageStructureChangedError",
-					"The course_elements selector is an empty list.",
-					"Please update the xpaths in the source code."
-				)
+				raise WebPageChangedError('course_elements')
 
 			for course_element in course_elements:
 				course_attribute_elements = course_element.xpath('.//span')
 				if course_attribute_elements == []:
-					raise Exception(
-						"WebPageStructureChangedError",
-						"The course_attribute_elements selector is an empty list.",
-						"Please update the xpaths in the source code."
-					)
+					raise WebPageChangedError('course_attribute_elements')
 
 				course = Course()
 				course['course_name'] = course_attribute_elements[0].xpath('a/text()').extract()
@@ -78,17 +72,27 @@ class MyuniversityscraperSpider(Spider):
 
 			yield self.get_next_page(sel, is_undergraduate)
 
-		except Exception as e:
+		except WebPageChangedError as e:
 			print
-			print e.args[0]+': ', e.args[1]
-			print 'Fix:', e.args[2]
+			print e.description
+			print e.message
+			print e.fix
 			print
 
-	def get_next_page(self, selector, is_undergraduate):
-		paginator = selector.xpath("//div[@class='myuni-alignright-whenbig'][../p[@id='navigationDescriptor']]/label")
-		number_of_pages = int(paginator.xpath("span[last()]/text()").extract()[0].replace('of', ''))
-		current_page = int(paginator.xpath("input/@value").extract()[0])
+	def get_next_page(self, sel, is_undergraduate):
+		try:
+			paginator = sel.xpath(
+				"//div[@class='myuni-alignright-whenbig'][../p[@id='navigationDescriptor']]/label"
+			)
+			if paginator == []:
+				raise WebPageChangedError('paginator')
 
-		if number_of_pages > current_page:
-			course_level = 'Undergraduate' if is_undergraduate else 'Postgraduate'
-			return self.get_request(course_level, current_page)
+			number_of_pages = int(paginator.xpath("pan[last()]/text()").extract()[0].replace('of', ''))
+			current_page = int(paginator.xpath("input/@value").extract()[0])
+
+			if number_of_pages > current_page:
+				course_level = 'Undergraduate' if is_undergraduate else 'Postgraduate'
+				return self.get_request(course_level, current_page)
+
+		except IndexError:
+			raise WebPageChangedError('number_of_pages or current_page')

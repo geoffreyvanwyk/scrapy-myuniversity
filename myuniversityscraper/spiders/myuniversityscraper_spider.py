@@ -49,6 +49,13 @@ class MyuniversityscraperSpider(Spider):
 
 			for course_element in course_elements:
 				course_attribute_elements = course_element.xpath('.//span')
+				if course_attribute_elements == []:
+					raise Exception(
+						"WebPageStructureChangedError",
+						"The course_attribute_elements selector is an empty list.",
+						"Please update the xpaths in the source code."
+					)
+
 				course = Course()
 				course['course_name'] = course_attribute_elements[0].xpath('a/text()').extract()
 				if is_undergraduate:
@@ -74,7 +81,7 @@ class MyuniversityscraperSpider(Spider):
 			if number_of_pages > current_page:
 				course_level = 'Undergraduate' if is_undergraduate else 'Postgraduate'
 				yield self.get_request(course_level, current_page)
-			
+
 		except Exception as e:
 			print
 			print e.args[0]+': ', e.args[1]

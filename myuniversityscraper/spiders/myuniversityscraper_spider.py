@@ -54,31 +54,7 @@ class MyuniversityscraperSpider(Spider):
 				if fields == []:
 					raise WebPageChangedError('fields')
 
-				crs = Course()
-				crs['course_name'] = fields[0].xpath('a/text()').extract()
-
-				if is_undergraduate:
-					crs['cutoff_atar'] = fields[2].xpath('text()').extract()
-					crs['duration'] = fields[4].xpath('text()').extract()
-					crs['award_type'] = fields[5].xpath('text()').extract()
-					crs['field_of_education'] = (
-						fields[6].xpath('text()').extract()
-					)
-					crs['provider'] = fields[7].xpath('a/text()').extract()
-					crs['campus'] = fields[8].xpath('text()').extract()
-					crs['level'] = 'Undergraduate'
-				else:
-					crs['cutoff_atar'] = ''
-					crs['duration'] = fields[2].xpath('text()').extract()
-					crs['award_type'] = fields[3].xpath('text()').extract()
-					crs['field_of_education'] = (
-						fields[4].xpath('text()').extract()
-					)
-					crs['provider'] = fields[5].xpath('a/text()').extract()
-					crs['campus'] = fields[6].xpath('text()').extract()
-					crs['level'] = 'Postgraduate'
-
-				yield crs
+				yield self.extract_fields(fields, is_undergraduate)
 
 			yield self.get_next_page(sel, is_undergraduate)
 
@@ -88,6 +64,37 @@ class MyuniversityscraperSpider(Spider):
 			print e.message
 			print e.fix
 			print
+
+	def extract_fields(self, fields, is_undergraduate):
+		try:
+			course = Course()
+			course['course_name'] = fields[0].xpath('a/text()').extract()
+
+			if is_undergraduate:
+				course['cutoff_atar'] = fields[2].xpath('text()').extract()
+				course['duration'] = fields[4].xpath('text()').extract()
+				course['award_type'] = fields[5].xpath('text()').extract()
+				course['field_of_education'] = (
+					fields[6].xpath('text()').extract()
+				)
+				course['provider'] = fields[7].xpath('a/text()').extract()
+				course['campus'] = fields[8].xpath('text()').extract()
+				course['level'] = 'Undergraduate'
+			else:
+				course['cutoff_atar'] = ''
+				course['duration'] = fields[2].xpath('text()').extract()
+				course['award_type'] = fields[3].xpath('text()').extract()
+				course['field_of_education'] = (
+					fields[4].xpath('text()').extract()
+				)
+				course['provider'] = fields[5].xpath('a/text()').extract()
+				course['campus'] = fields[6].xpath('text()').extract()
+				course['level'] = 'Postgraduate'
+
+			return course
+
+		except IndexError:
+			raise WebPageChangedError('indexed element of fields')
 
 	def get_next_page(self, sel, is_undergraduate):
 		try:

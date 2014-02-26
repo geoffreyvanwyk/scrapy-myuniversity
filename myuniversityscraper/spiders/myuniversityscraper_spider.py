@@ -32,9 +32,9 @@ class MyuniversityscraperSpider(Spider):
 			'resetSelections': 'false',
 			'sortDirection': 'Ascending',
 			'sortOrder': ''
-		}, callback=self.get_courses)
+		}, callback=self.parse_page)
 
-	def get_courses(self, response):
+	def parse_page(self, response):
 		is_undergraduate = 'Undergraduate' in response.url
 		sel = Selector(response)
 
@@ -76,16 +76,19 @@ class MyuniversityscraperSpider(Spider):
 					course['level'] = 'Postgraduate'
 				yield course
 
-			paginator = sel.xpath("//div[@class='myuni-alignright-whenbig'][../p[@id='navigationDescriptor']]/label")
-			number_of_pages = int(paginator.xpath("span[last()]/text()").extract()[0].replace('of', ''))
-			current_page = int(paginator.xpath("input/@value").extract()[0])
-		
-			if number_of_pages > current_page:
-				course_level = 'Undergraduate' if is_undergraduate else 'Postgraduate'
-				yield self.get_request(course_level, current_page)
+			yield self.get_next_page(sel, is_undergraduate)
 
 		except Exception as e:
 			print
 			print e.args[0]+': ', e.args[1]
 			print 'Fix:', e.args[2]
 			print
+
+	def get_next_page(self, selector, is_undergraduate):
+		paginator = selector.xpath("//div[@class='myuni-alignright-whenbig'][../p[@id='navigationDescriptor']]/label")
+		number_of_pages = int(paginator.xpath("span[last()]/text()").extract()[0].replace('of', ''))
+		current_page = int(paginator.xpath("input/@value").extract()[0])
+
+		if number_of_pages > current_page:
+			course_level = 'Undergraduate' if is_undergraduate else 'Postgraduate'
+			return self.get_request(course_level, current_page)

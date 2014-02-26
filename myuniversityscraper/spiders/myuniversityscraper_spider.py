@@ -5,7 +5,7 @@ from scrapy.http import FormRequest
 from myuniversityscraper.items import Course
 from myuniversityscraper.exceptions import WebPageChangedError
 
-class MyuniversityscraperSpider(Spider):
+class MyUniversityScraperSpider(Spider):
 	name = 'myuniversity'
 	allowed_domains = ['myuniversity.gov.au']
 
@@ -13,7 +13,7 @@ class MyuniversityscraperSpider(Spider):
 		course_levels = ['Undergraduate', 'Postgraduate']
 		requests = []
 		for course_level in course_levels:
-			requests.append(self.get_request(course_level, 0))
+			requests.append(self.get_request(course_level, page_number=1))
 		return requests
 
 	def get_request(self, course_level, page_number):
@@ -32,7 +32,7 @@ class MyuniversityscraperSpider(Spider):
 				'degreeStudyOption': '0',
 				'deliveryOption': '0',
 				'excludedWords': '',
-				'page':	str(page_number + 1),
+				'page':	str(page_number),
 				'pageSize':	'Hundred',
 				'providerType':	'0',
 				'resetSelections': 'false',
@@ -122,7 +122,7 @@ class MyuniversityscraperSpider(Spider):
 				else:
 					course_level = 'Postgraduate'
 
-				return self.get_request(course_level, current_page)
+				return self.get_request(course_level, current_page + 1)
 
 		except IndexError:
 			raise WebPageChangedError('number_of_pages or current_page')

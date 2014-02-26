@@ -76,8 +76,10 @@ class MyuniversityscraperSpider(Spider):
 					course['level'] = 'Postgraduate'
 				yield course
 
-			number_of_pages = int(sel.xpath("//div[@class='myuni-alignright-whenbig'][../p[@id='navigationDescriptor']]/label/span[last()]/text()").extract()[0].replace('of', ''))
-			current_page = int(sel.xpath("//div[@class='myuni-alignright-whenbig'][../p[@id='navigationDescriptor']]/label/input/@value").extract()[0])
+			paginator = sel.xpath("//div[@class='myuni-alignright-whenbig'][../p[@id='navigationDescriptor']]/label")
+			number_of_pages = int(paginator.xpath("span[last()]/text()").extract()[0].replace('of', ''))
+			current_page = int(paginator.xpath("input/@value").extract()[0])
+		
 			if number_of_pages > current_page:
 				course_level = 'Undergraduate' if is_undergraduate else 'Postgraduate'
 				yield self.get_request(course_level, current_page)

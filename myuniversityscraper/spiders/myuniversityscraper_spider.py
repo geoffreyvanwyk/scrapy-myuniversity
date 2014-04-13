@@ -2,17 +2,36 @@ from scrapy.spider import Spider
 from scrapy.selector import Selector
 from scrapy.http import FormRequest
 
+from scrapy import signals
+from scrapy.xlib.pydispatch import dispatcher
+
 from myuniversityscraper.items import Course
 from myuniversityscraper.exceptions import WebPageChangedError
+
+from datetime import datetime
+from sys import stdout
 
 class MyUniversityScraperSpider(Spider):
 	name = 'myuniversity'
 	allowed_domains = ['myuniversity.gov.au']
+	
+	course_levels = ['Undergraduate', 'Postgraduate']
+	total_courses = 0
+	level_counter = 0
+	current_course = 0
+
+	def __init__(self):
+		print 'Start Time: ', datetime.today().strftime("%H:%M:%S %b %d, %Y")
+		print 'Initializing ...'
+		dispatcher.connect(self.print_progress, signals.item_scraped)
+
+	def __del__(self):
+		print 'Stop Time: ', datetime.today().strftime("%H:%M:%S %b %d, %Y")
+		print 'Done.'
 
 	def start_requests(self):
-		course_levels = ['Undergraduate', 'Postgraduate']
 		requests = []
-		for course_level in course_levels:
+		for course_level in self.course_levels:
 			requests.append(self.get_request(course_level, page_number=1))
 		return requests
 
@@ -98,6 +117,19 @@ class MyUniversityScraperSpider(Spider):
 
 	def get_next_page(self, sel, is_undergraduate):
 		try:
+			search_results = sel.xpath(
+				"//div[@class='uxSearchResultsShowing']" +
+				"/span" + 
+				"/text()"
+			).extract()[0]
+			
+			of_index = search_results.find('of')
+			total_courses_current_level = int(search_results[of_index + 3:])
+			
+			if self.level_counter < len(self.course_levels):
+				self.total_courses += total_courses_current_level 
+				self.level_counter += 1
+				
 			paginator = sel.xpath(
 				"//div[@class='myuni-alignright-whenbig']" +
 				"[../p[@id='navigationDescriptor']]/label"
@@ -106,11 +138,10 @@ class MyUniversityScraperSpider(Spider):
 				raise WebPageChangedError('paginator')
 
 			number_of_pages = (
-				int(
-					paginator
-						.xpath("span[last()]/text()")
-						.extract()[0]
-						.replace('of', '')
+				int(paginator
+					.xpath("span[last()]/text()")
+					.extract()[0]
+					.replace('of', '')
 				)
 			)
 
@@ -126,3 +157,37 @@ class MyUniversityScraperSpider(Spider):
 
 		except IndexError:
 			raise WebPageChangedError('number_of_pages or current_page')
+
+	def print_progress(self):
+		self.current_course += 1
+		stdout.write(
+			self.get_backspaces(self.current_course, self.total_courses) +
+			'Retrieving Course: ' +
+			str(self.current_course) +
+			' of ' +
+			str(self.total_courses)
+		)
+		stdout.flush()
+
+	def get_backspaces(self, current_course, total_courses):
+		'''
+		To update the current page number in place, the previous number has to be deleted with backspace
+		characters.
+		The number of backspaces depends upon the number of digits in the number. Every time the number is 
+		divided by 10, one of the digits is taken away. In this way, an additional backspace is appended for
+		every digit.
+		'''
+		# Includes four backspaces for ' of ' and fourteen for 'Parsing Page: '.
+		b = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" 
+		
+		m = current_course 
+		while m / 10 > 0:
+			b += "\b"
+			m /= 10
+		
+		n = total_courses 
+		while n / 10 > 0:
+			b += "\b"
+			n /= 10
+		
+		return b

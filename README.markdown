@@ -24,10 +24,10 @@ From the root directory of the project, issue the following command:
 
 The script's terminal output will be similar to this:
 
-> Start Time:  18:15:29 Apr 13, 2014
-> Initializing ...
-> Retrieving Course: 15582 of 15582
-> Stop Time:  18:18:00 Apr 13, 2014
+> Start Time:  18:15:29 Apr 13, 2014 <br>
+> Initializing ... <br>
+> Retrieving Course: 15582 of 15582 <br>
+> Stop Time:  18:18:00 Apr 13, 2014 <br>
 > Done.
 
 The script will produce a CSV (comma-separated values) file with a file name of the form `myuniversity-courses-&lt;date-and-time&gt;.csv in the results directory. The file name contains the date on and time at which the scrape was performed. It is necessary to have a unique file name each time to prevent the results being appended to previous results.

@@ -36,11 +36,11 @@ The script will produce a CSV (comma-separated values) file with a file name of 
 
 To create a standalone application which does not need the installation of Python, Scrapy or any other dependencies, use [PyInstaller](http://pythonhosted.org/PyInstaller/#installing-using-pip). Issue the following command from the root of the project's directory tree:
 
-	pyinstaller myuniversityscraper.py
+	pyinstaller myuniversityscraper.py --name=myuniversityscraper-<operating-system>-<version-number>
 
 PyInstaller will create a **myuniversityscraper.spec** file, and two directories, **build** and **dist**. The **dist** directory contains a **myuniversityscraper** directory. This latter directory can be distributed. It contains an executable (myuniversityscraper) and other files which the executable needs. On a GNU/Linux system, the executable can be run from the command line as follows (from the same directory that contains the executable):
 
-	./myuniversityscraper
+	./myuniversityscraper-<operating-system>-<version-number>
 
 It has the same output as the Python script.
 

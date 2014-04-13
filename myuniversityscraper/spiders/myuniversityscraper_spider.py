@@ -25,10 +25,6 @@ class MyUniversityScraperSpider(Spider):
 		print 'Initializing ...'
 		dispatcher.connect(self.print_progress, signals.item_scraped)
 
-	def __del__(self):
-		print 'Stop Time: ', datetime.today().strftime("%H:%M:%S %b %d, %Y")
-		print 'Done.'
-
 	def start_requests(self):
 		requests = []
 		for course_level in self.course_levels:
@@ -168,6 +164,11 @@ class MyUniversityScraperSpider(Spider):
 			str(self.total_courses)
 		)
 		stdout.flush()
+		
+		if self.current_course == self.total_courses:
+			print
+			print 'Stop Time: ', datetime.today().strftime("%H:%M:%S %b %d, %Y")
+			print 'Done.'
 
 	def get_backspaces(self, current_course, total_courses):
 		'''

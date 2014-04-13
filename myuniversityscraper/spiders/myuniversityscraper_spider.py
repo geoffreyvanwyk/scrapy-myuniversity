@@ -178,8 +178,11 @@ class MyUniversityScraperSpider(Spider):
 		divided by 10, one of the digits is taken away. In this way, an additional backspace is appended for
 		every digit.
 		'''
-		# Includes four backspaces for ' of ' and fourteen for 'Parsing Page: '.
-		b = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" 
+		b = (
+			"\b" + 
+			"\b\b\b\b" + # To delete ' of '.
+			"\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b" # To delete 'Retrieving Course: '.
+		)
 		
 		m = current_course 
 		while m / 10 > 0:

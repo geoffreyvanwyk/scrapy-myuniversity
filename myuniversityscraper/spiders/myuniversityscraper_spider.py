@@ -169,6 +169,7 @@ class MyUniversityScraperSpider(Spider):
 			print
 			print 'Stop Time: ', datetime.today().strftime("%H:%M:%S %b %d, %Y")
 			print 'Done.'
+			raw_input('Press ENTER to exit ...')
 
 	def get_backspaces(self, current_course, total_courses):
 		'''

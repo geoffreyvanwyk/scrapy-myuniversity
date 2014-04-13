@@ -22,13 +22,13 @@ From the root directory of the project, issue the following command:
 
 	python myuniversityscraper.py
 
-The beginning of the script's terminal output will be similar to this:
+The script's terminal output will be similar to this:
 
-![Screenshot of beginning of terminal output](images/beginning-of-terminal-output.png)
-
-The end of the script's terminal output will be similar to this:
-
-![Screenshot of end of terminal output](images/end-of-terminal-output.png)
+> Start Time:  18:15:29 Apr 13, 2014
+> Initializing ...
+> Retrieving Course: 15582 of 15582
+> Stop Time:  18:18:00 Apr 13, 2014
+> Done.
 
 The script will produce a CSV (comma-separated values) file with a file name of the form `myuniversity-courses-&lt;date-and-time&gt;.csv in the results directory. The file name contains the date on and time at which the scrape was performed. It is necessary to have a unique file name each time to prevent the results being appended to previous results.
 
